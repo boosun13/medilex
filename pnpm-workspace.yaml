@@ -2,3 +2,5 @@ packages:
   - "apps/*"
   - "packages/*"
   - "infra/*"
+minimumReleaseAgeExclude:
+  - '@langchain/core@1.1.49'
