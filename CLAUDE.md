@@ -10,13 +10,11 @@
 <type>: <subject（命令形・現在形）>
 
 <body: 箇条書きで「何を・なぜ」>
-
-Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 ```
 
 - 件名（subject）は簡潔に。末尾にピリオドを付けない。
 - 本文（body）は変更点を箇条書きで列挙する（任意だが推奨）。
-- コミットメッセージ末尾に必ず `Co-Authored-By` トレーラを付ける。
+- **`Co-Authored-By` などの共同作成者トレーラは付けない。**
 
 ### type 一覧
 
@@ -46,8 +44,6 @@ chore: scaffold monorepo root with mise and pnpm
 
 - pin node 24.16.0 (LTS) and pnpm 11.6.0 via mise.toml
 - add root package.json as private workspace parent
-
-Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 ```
 
 ## コミュニケーション
