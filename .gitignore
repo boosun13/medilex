@@ -1,0 +1,25 @@
+# 依存
+node_modules/
+
+# ビルド成果物
+dist/
+.next/
+out/
+*.tsbuildinfo
+
+# Turborepo
+.turbo/
+
+# AWS CDK
+cdk.out/
+
+# 環境変数（.env.example だけは追跡する）
+.env
+.env.*
+!.env.example
+
+# カバレッジ
+coverage/
+
+# OS / エディタ
+.DS_Store
