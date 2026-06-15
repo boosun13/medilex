@@ -45,6 +45,80 @@
 
 ---
 
+## アーキテクチャ
+
+### システム全体構成
+
+```mermaid
+flowchart LR
+    User([ユーザー]) --> CF[CloudFront]
+    CF --> Web["apps/web<br/>Next.js"]
+    Web -->|"REST + SSE"| API["apps/api<br/>クリーンアーキ"]
+    API --> Core["packages/rag-core<br/>RAG ロジック"]
+    Core -->|"埋め込み / 生成"| OpenAI[(OpenAI API)]
+    Core -->|"ベクトル検索 / 保存"| PG[("PostgreSQL<br/>+ pgvector")]
+    API -.->|"メトリクス / ログ"| DD[(Datadog)]
+```
+
+### クリーンアーキテクチャの依存方向
+
+依存は常に「外 → 内」。内側（domain）は外側を知らず、外部依存はポート（interface）で抽象化して差し替え可能にする。
+
+```mermaid
+flowchart TB
+    subgraph interfaces["interfaces 層"]
+        HTTP["HTTP コントローラ / ルーティング"]
+    end
+    subgraph application["application 層"]
+        UC["ユースケース<br/>(ingest / query)"]
+    end
+    subgraph domain["domain 層（最内・純粋）"]
+        SVC["RagService<br/>RAG オーケストレーション"]
+        PORT["ポート（interface）<br/>LLMProvider / VectorStore / TextSplitter"]
+    end
+    subgraph infra["infrastructure 層"]
+        OAI["OpenAI アダプタ"]
+        PGV["pgvector アダプタ"]
+        SPL["LangChain 分割アダプタ"]
+    end
+
+    HTTP --> UC --> SVC --> PORT
+    OAI -.implements.-> PORT
+    PGV -.implements.-> PORT
+    SPL -.implements.-> PORT
+```
+
+> 矢印は依存方向。infrastructure のアダプタは domain のポートを **実装**する（依存性逆転）。これにより OpenAI → 別 LLM、pgvector → 別ストアへ、domain を変えずに交換できる。
+
+### RAG のデータフロー
+
+```mermaid
+sequenceDiagram
+    participant U as ユーザー
+    participant API as apps/api
+    participant Core as rag-core
+    participant Emb as OpenAI (埋め込み)
+    participant PG as pgvector
+    participant LLM as OpenAI (生成)
+
+    Note over API,PG: ① 取り込み（ingest）
+    API->>Core: ドキュメント取り込み
+    Core->>Core: テキスト分割（chunk 化）
+    Core->>Emb: chunk を埋め込みベクトル化
+    Core->>PG: ベクトル + メタデータを保存
+
+    Note over API,LLM: ② 質問応答（query）
+    U->>API: 質問
+    API->>Core: query(question)
+    Core->>Emb: 質問を埋め込み
+    Core->>PG: 類似チャンク検索（topK）
+    Core->>LLM: 質問 + 関連チャンクで回答生成
+    LLM-->>API: 回答（SSE ストリーム）
+    API-->>U: 回答 + 出典（citations）
+```
+
+---
+
 ## モノレポ構成（予定）
 
 ```

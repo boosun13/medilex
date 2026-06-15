@@ -46,6 +46,15 @@ chore: scaffold monorepo root with mise and pnpm
 - add root package.json as private workspace parent
 ```
 
+## 実装方針
+
+- **実装 → interface 抽出**の順序で進める。先にポート（interface）を定義するのではなく、
+  まず動く具体実装を書き、動く形を見てから interface を抽出する。投機的な抽象化を避ける。
+  - 要件が明確な抽象（例: LLM 差し替え）は最終的にポート化するが、到達経路は implement-first。
+- **クリーンアーキテクチャ**: 依存方向は常に「外 → 内」（infrastructure / interfaces → application → domain）。
+  内側（domain）は外側を知らない。LLM・ベクトルストアなどの外部依存はポートとして抽象化し差し替え可能にする。
+- **段階的構築**: ステージ単位で「実装 → 検証 → コミット」を1区切りにする。
+
 ## コミュニケーション
 
 - ユーザーとのやり取りは日本語で行う。
