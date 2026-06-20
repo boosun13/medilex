@@ -12,8 +12,8 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "dev": "tsc -p tsconfig.json --watch",
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@types/pg": "^8.20.0",
+    "tsup": "^8.5.1",
     "typescript": "^6.0.3"
   }
 }
