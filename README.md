@@ -37,8 +37,9 @@
 | 言語 | **TypeScript** | フロント・バック共通 |
 | フロントエンド | **Next.js**（App Router） | `apps/web` |
 | バックエンド | **Node.js + TypeScript** | `apps/api`、クリーンアーキ構成 |
-| RAG コア | **LangChain.js** + OpenAI API | `packages/rag-core` にドメインロジックを集約 |
-| LLM / 埋め込み | **OpenAI API** | ポート経由で差し替え可能 |
+| RAG コア | **LangChain.js** | `packages/rag-core` にドメインロジックを集約 |
+| LLM（回答生成） | **Anthropic Claude API**（`claude-haiku-4-5`） | ポート経由で差し替え可能 |
+| 埋め込み | **OpenAI API** | ポート経由で差し替え可能 |
 | ベクトル検索 | **PostgreSQL + pgvector** | 専用ベクトル DB は使わない |
 | インフラ | **AWS**（ECS / RDS / S3 / CloudFront） | IaC は AWS CDK（`infra/cdk`） |
 | 監視 | **Datadog** | |
@@ -55,7 +56,8 @@ flowchart LR
     CF --> Web["apps/web<br/>Next.js"]
     Web -->|"REST + SSE"| API["apps/api<br/>クリーンアーキ"]
     API --> Core["packages/rag-core<br/>RAG ロジック"]
-    Core -->|"埋め込み / 生成"| OpenAI[(OpenAI API)]
+    Core -->|"回答生成"| Claude[(Anthropic Claude API)]
+    Core -->|"埋め込み"| OpenAI[(OpenAI API)]
     Core -->|"ベクトル検索 / 保存"| PG[("PostgreSQL<br/>+ pgvector")]
     API -.->|"メトリクス / ログ"| DD[(Datadog)]
 ```
@@ -99,7 +101,7 @@ sequenceDiagram
     participant Core as rag-core
     participant Emb as OpenAI (埋め込み)
     participant PG as pgvector
-    participant LLM as OpenAI (生成)
+    participant LLM as Claude (生成)
 
     Note over API,PG: ① 取り込み（ingest）
     API->>Core: ドキュメント取り込み
